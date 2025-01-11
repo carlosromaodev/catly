@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  nome         String
+  telefone     String
+  senha        String
+  role         Role          @default(USUARIO)
+  criadoEm     DateTime      @default(now())
+  atualizadoEm DateTime      @updatedAt
+  fornecedorId String?
+  afiliacoes   Afiliacao[]
+  catalogos    Catalogo[]
+  Fornecedor   Fornecedor?   @relation("UsuarioToFornecedor")
+  localizacoes Localizacao[]
+  fornecedor   Fornecedor?   @relation(fields: [fornecedorId], references: [id])
+}
+
+model Fornecedor {
+  id           String              @id @default(cuid())
+  email        String              @unique
+  telefone     String
+  descricao    String
+  role         Role
+  usuarioId    String              @unique
+  criadoEm     DateTime            @default(now())
+  atualizadoEm DateTime            @updatedAt
+  nif          String              @unique
+  nomeNegocio  String
+  usuario      Usuario             @relation("UsuarioToFornecedor", fields: [usuarioId], references: [id])
+  Localizacao  Localizacao[]
+  produtos     Produto[]
+  programas    ProgramaAfiliados[]
+  Usuario      Usuario[]
+}
+
+model Localizacao {
+  id           String      @id @default(cuid())
+  latitude     Float
+  longitude    Float
+  usuarioId    String?
+  fornecedorId String?
+  criadoEm     DateTime    @default(now())
+  atualizadoEm DateTime    @updatedAt
+  fornecedor   Fornecedor? @relation(fields: [fornecedorId], references: [id])
+  usuario      Usuario?    @relation(fields: [usuarioId], references: [id])
+}
+
+model Catalogo {
+  id           String    @id @default(cuid())
+  nome         String
+  descricao    String
+  criadoEm     DateTime  @default(now())
+  atualizadoEm DateTime  @updatedAt
+  usuarioId    String
+  usuario      Usuario   @relation(fields: [usuarioId], references: [id])
+  menus        Menu[]
+  produtos     Produto[]
+}
+
+model Produto {
+  id              String          @id @default(cuid())
+  nome            String
+  preco           Float
+  criadoEm        DateTime        @default(now())
+  atualizadoEm    DateTime        @updatedAt
+  catalogoId      String?
+  disponibilidade Disponibilidade @default(DISPONIVEL)
+  fornecedorId    String
+  quantidade      Int
+  Catalogo        Catalogo?       @relation(fields: [catalogoId], references: [id])
+  fornecedor      Fornecedor      @relation(fields: [fornecedorId], references: [id])
+}
+
+model Afiliacao {
+  id           String            @id @default(cuid())
+  usuarioId    String
+  programaId   String
+  criadoEm     DateTime          @default(now())
+  atualizadoEm DateTime          @updatedAt
+  programa     ProgramaAfiliados @relation(fields: [programaId], references: [id])
+  usuario      Usuario           @relation(fields: [usuarioId], references: [id])
+}
+
+model ProgramaAfiliados {
+  id           String      @id @default(cuid())
+  fornecedorId String
+  nome         String
+  descricao    String
+  comissao     Float
+  criadoEm     DateTime    @default(now())
+  atualizadoEm DateTime    @updatedAt
+  afiliacoes   Afiliacao[]
+  fornecedor   Fornecedor  @relation(fields: [fornecedorId], references: [id])
+}
+
+model Menu {
+  id           String   @id @default(cuid())
+  nome         String
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+  catalogoId   String
+  itens        Item[]
+  catalogo     Catalogo @relation(fields: [catalogoId], references: [id])
+}
+
+model Item {
+  id           String   @id @default(cuid())
+  nome         String
+  preco        Float
+  menuId       String
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+  menu         Menu     @relation(fields: [menuId], references: [id])
+}
+
+enum Role {
+  USUARIO
+  FORNECEDOR
+  ADMINISTRADOR
+}
+
+enum Disponibilidade {
+  DISPONIVEL
+  INDISPONIVEL
+}
