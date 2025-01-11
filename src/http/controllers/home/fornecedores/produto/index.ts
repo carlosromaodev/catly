@@ -58,16 +58,11 @@ export async function RegisterProduct(
 
     exibir.info(`Produto criado com sucesso: ${produto.produto.nome}`)
     reply.status(201).send({ message: 'Produto criado com sucesso' })
-  } catch (err: any) {
-    const errorMessage =
-      err instanceof z.ZodError
-        ? 'Erro de validação: ' + err.errors.map(e => e.message).join(', ')
-        : err.message || 'Erro desconhecido'
-
-    exibir.fatal(`Erro ao criar produto: ${errorMessage}`)
+  } catch (err) {
+    exibir.fatal(`Erro ao criar produto: ${err}`)
     reply.status(400).send({
       message: 'Erro no cadastro do produto',
-      details: errorMessage,
+      details: err,
     })
   }
 }
