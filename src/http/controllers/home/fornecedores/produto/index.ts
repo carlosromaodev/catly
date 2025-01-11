@@ -36,7 +36,7 @@ export async function RegisterProduct(
     const data = shemaProduct.parse(request.body)
     exibir.info('Dados validados com sucesso')
 
-    const fornecedorData =
+    const fornecedorData = carlos romao 
       await FactoriesFornecedor().findFornecedorEmail(idUserEmail)
 
     if (!fornecedorData || !fornecedorData.fornecedor) {
