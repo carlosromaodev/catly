@@ -3,6 +3,7 @@ import { exibir } from '@/use-case/utils/exibir'
 import type { FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
 import { FactoriesFornecedor } from '@/use-case/factories/factories-fornecedor'
+import {fatoriesCatalogo} from "@/use-case/factories/factories-catalogo"
 
 export async function RegisterProduct(
   request: FastifyRequest,
@@ -36,8 +37,9 @@ export async function RegisterProduct(
     const data = shemaProduct.parse(request.body)
     exibir.info('Dados validados com sucesso')
 
-    const fornecedorData = carlos romao 
+    const fornecedorData = 
       await FactoriesFornecedor().findFornecedorEmail(idUserEmail)
+      const catalogoide = await fatoriesCatalogo().findId(userId)
 
     if (!fornecedorData || !fornecedorData.fornecedor) {
       throw new Error('Fornecedor não encontrado para o email fornecido')
@@ -52,7 +54,7 @@ export async function RegisterProduct(
       nome: data.nome,
       disponivel: data.disponivel,
       fornecedorId: fornecedorId,
-      catalogoId: 
+      catalogoId: catalogoide[0].id
 
     })
 

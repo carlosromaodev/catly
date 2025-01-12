@@ -33,4 +33,13 @@ export class createCatalogo {
 
     return { catalogo }
   }
+
+  async findId(id: string) {
+    const catalogo = await this.FuncoesCatalogo.findId(id)
+
+    if(!catalogo){
+      throw new Error()
+    }
+    return catalogo
+  }
 }
