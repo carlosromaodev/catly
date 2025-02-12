@@ -1,9 +1,9 @@
+import { fatoriesCatalogo } from '@/use-case/factories/factories-catalogo'
+import { FactoriesFornecedor } from '@/use-case/factories/factories-fornecedor'
 import { factoriesProdutos } from '@/use-case/factories/factories-produto'
 import { exibir } from '@/use-case/utils/exibir'
-import type { FastifyRequest, FastifyReply } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
-import { FactoriesFornecedor } from '@/use-case/factories/factories-fornecedor'
-import {fatoriesCatalogo} from "@/use-case/factories/factories-catalogo"
 
 export async function RegisterProduct(
   request: FastifyRequest,
@@ -24,7 +24,7 @@ export async function RegisterProduct(
   })
 
   try {
-    const usuario =  request.user
+    const usuario = request.user
     const userId = usuario.sub
     const idUserEmail = usuario.email
 
@@ -37,9 +37,9 @@ export async function RegisterProduct(
     const data = shemaProduct.parse(request.body)
     exibir.info('Dados validados com sucesso')
 
-    const fornecedorData = 
+    const fornecedorData =
       await FactoriesFornecedor().findFornecedorEmail(idUserEmail)
-      const catalogoide = await fatoriesCatalogo().findId(userId)
+    const catalogoide = await fatoriesCatalogo().findId(userId)
 
     if (!fornecedorData || !fornecedorData.fornecedor) {
       throw new Error('Fornecedor não encontrado para o email fornecido')
@@ -54,8 +54,7 @@ export async function RegisterProduct(
       nome: data.nome,
       disponivel: data.disponivel,
       fornecedorId: fornecedorId,
-      catalogoId: catalogoide[0].id
-
+      catalogoId: catalogoide[0].id,
     })
 
     exibir.info(`Produto criado com sucesso: ${produto.produto.nome}`)
@@ -68,5 +67,3 @@ export async function RegisterProduct(
     })
   }
 }
-
-

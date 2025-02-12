@@ -1,5 +1,5 @@
-import type { Usuario } from '@prisma/client'
-export interface usuario {
+import type { Comerciante, User } from '@prisma/client'
+export interface User {
   email: string
   nome: string
   senha: string
@@ -7,10 +7,12 @@ export interface usuario {
   id: string
 }
 
-export interface makeUsuario {
-  Criar(data: usuario): Promise<Usuario>
-  ProcurarGmail(email: string): Promise<Usuario | null>
-  findId(id: string): Promise<Usuario | null>
-  alterarSenha(email: string, novaSenha: string): Promise<Usuario>
-  actualizarUsuario(email: string, fornecedorId: string): Promise<Usuario>
+export interface makeUser {
+
+  Create(data: User): Promise<User>
+  FindEmail(email: string): Promise<User | null>
+  findId(id: string): Promise<User | null>
+  ChangePassword(email: string, newPassword: string): Promise<User>
+  ChangeName(email: string, newName: string): Promise<User>
+
 }

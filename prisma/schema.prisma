@@ -1,134 +1,452 @@
+// Gerador do Prisma Client (client JS/TS)
 generator client {
   provider = "prisma-client-js"
 }
 
+// Fonte de dados: conexão com o PostgreSQL via variável de ambiente
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Usuario {
-  id           String        @id @default(cuid())
-  email        String        @unique
-  nome         String
-  telefone     String
-  senha        String
-  role         Role          @default(USUARIO)
-  criadoEm     DateTime      @default(now())
-  atualizadoEm DateTime      @updatedAt
-  fornecedorId String?
-  afiliacoes   Afiliacao[]
-  catalogos    Catalogo[]
-  Fornecedor   Fornecedor?   @relation("UsuarioToFornecedor")
-  localizacoes Localizacao[]
-  fornecedor   Fornecedor?   @relation(fields: [fornecedorId], references: [id])
-}
+//
+// ========================= ENUMS =========================
+//
 
-model Fornecedor {
-  id           String              @id @default(cuid())
-  email        String              @unique
-  telefone     String
-  descricao    String
-  role         Role
-  usuarioId    String              @unique
-  criadoEm     DateTime            @default(now())
-  atualizadoEm DateTime            @updatedAt
-  nif          String              @unique
-  nomeNegocio  String
-  usuario      Usuario             @relation("UsuarioToFornecedor", fields: [usuarioId], references: [id])
-  Localizacao  Localizacao[]
-  produtos     Produto[]
-  programas    ProgramaAfiliados[]
-  Usuario      Usuario[]
-}
-
-model Localizacao {
-  id           String      @id @default(cuid())
-  latitude     Float
-  longitude    Float
-  usuarioId    String?
-  fornecedorId String?
-  criadoEm     DateTime    @default(now())
-  atualizadoEm DateTime    @updatedAt
-  fornecedor   Fornecedor? @relation(fields: [fornecedorId], references: [id])
-  usuario      Usuario?    @relation(fields: [usuarioId], references: [id])
-}
-
-model Catalogo {
-  id           String    @id @default(cuid())
-  nome         String
-  descricao    String
-  criadoEm     DateTime  @default(now())
-  atualizadoEm DateTime  @updatedAt
-  usuarioId    String
-  usuario      Usuario   @relation(fields: [usuarioId], references: [id])
-  menus        Menu[]
-  produtos     Produto[]
-}
-
-model Produto {
-  id              String          @id @default(cuid())
-  nome            String
-  preco           Float
-  criadoEm        DateTime        @default(now())
-  atualizadoEm    DateTime        @updatedAt
-  catalogoId      String?
-  disponibilidade Disponibilidade @default(DISPONIVEL)
-  fornecedorId    String
-  quantidade      Int
-  Catalogo        Catalogo?       @relation(fields: [catalogoId], references: [id])
-  fornecedor      Fornecedor      @relation(fields: [fornecedorId], references: [id])
-}
-
-model Afiliacao {
-  id           String            @id @default(cuid())
-  usuarioId    String
-  programaId   String
-  criadoEm     DateTime          @default(now())
-  atualizadoEm DateTime          @updatedAt
-  programa     ProgramaAfiliados @relation(fields: [programaId], references: [id])
-  usuario      Usuario           @relation(fields: [usuarioId], references: [id])
-}
-
-model ProgramaAfiliados {
-  id           String      @id @default(cuid())
-  fornecedorId String
-  nome         String
-  descricao    String
-  comissao     Float
-  criadoEm     DateTime    @default(now())
-  atualizadoEm DateTime    @updatedAt
-  afiliacoes   Afiliacao[]
-  fornecedor   Fornecedor  @relation(fields: [fornecedorId], references: [id])
-}
-
-model Menu {
-  id           String   @id @default(cuid())
-  nome         String
-  criadoEm     DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
-  catalogoId   String
-  itens        Item[]
-  catalogo     Catalogo @relation(fields: [catalogoId], references: [id])
-}
-
-model Item {
-  id           String   @id @default(cuid())
-  nome         String
-  preco        Float
-  menuId       String
-  criadoEm     DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
-  menu         Menu     @relation(fields: [menuId], references: [id])
-}
-
-enum Role {
-  USUARIO
-  FORNECEDOR
-  ADMINISTRADOR
-}
-
+// Enum Disponibilidade: usado para indicar se um produto está disponível ou não.
 enum Disponibilidade {
   DISPONIVEL
   INDISPONIVEL
 }
+
+// Enum userStatus: define os status que um usuário pode ter na plataforma.
+enum userStatus {
+  EXPLORADOR
+  COMERCIAL
+  TRASNPORTADOR
+  GUARDIAO
+  INFLUENCIADOR
+  MEDIADOR
+  CRIADOR
+}
+
+// Enum roleEnum: define os papéis (roles) disponíveis no sistema.
+// Inclui papéis básicos e funções específicas para diferentes perfis.
+enum roleEnum {
+  User
+  FORNECEDOR
+  DISTRIBUIDOR
+  ENTREGADOR
+  GERENTE_RELACIONAMENTO
+  ADMINISTRADOR
+  LOGISTA
+  COMERCIANTE
+  ARTISTA
+  PRODUTOR
+  INFLUENTE
+  CINEMATOGRAFICO
+  YOUTUBER
+  BLOGUEIRO
+  PODCAST
+  FOTOGRAFO
+  EDUCACAO
+  TIKTOKER
+  COMEDIANTE
+}
+
+// enum ReportStatus
+// inclui todas as opçoẽs status para reportagens
+enum ReportStatus {
+  PENDING
+  IN_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+enum ReportCategory {
+  FRAUDE
+  CONTEUDO_INAPROPRIADO 
+  SPAM
+  ATENDIMENTO_RUIM 
+  OUTROS
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum paymentMethod {
+  MULTICAIXA_EXPRESS 
+  TRANSFERENCIA_BANCARIA
+  PAGAMENTO_POR_REFERENCIA
+  PAGAMENTO_NA_ENTREGA
+}
+//
+// ========================= MODELOS DE PERMISSÕES =========================
+//
+
+// Modelo Role: representa um papel que pode ser atribuído aos usuários.
+// Contém um identificador, name, descrição e o valor do enum roleEnum (roleUser).
+// Relaciona-se com o modelo permission via a relação "permissionRole".
+model Role {
+  id            String        @id @default(cuid())
+  name          String
+  description   String
+  roleUser      roleEnum
+  permission    permission[]  @relation("permissionRole")
+}
+
+// Modelo permission: define permissões que podem ser associadas a roles.
+// Possui name, descrição e estabelece relações com Role e com a tabela associativa Userpermission.
+model permission {
+  id             String         @id @default(cuid())
+  name           String
+  description    String
+  roles          Role[]         @relation("permissionRole")
+  Userpermission Userpermission[]
+}
+
+// Modelo Userpermission: tabela associativa que liga usuários a permissões (muitos para muitos).
+model Userpermission {
+  id            String        @id @default(cuid())
+  UserId        String
+  permissionId  String
+  User          User          @relation(fields: [UserId], references: [id])
+  permission    permission    @relation(fields: [permissionId], references: [id])
+}
+
+//
+// ========================= MODELO DE STATUS DO USUÁRIO =========================
+//
+
+// Modelo UserStatus: registra o status atual do usuário (ex.: EXPLORADOR, GUARDIAO, etc.).
+model UserStatus {
+  id       String      @id @default(cuid())
+  UserId   String
+  status   userStatus
+  CreateIn DateTime    @default(now())
+  User     User        @relation(fields: [UserId], references: [id])
+}
+
+//
+// ========================= MODELOS PRINCIPAIS =========================
+//
+
+// Modelo User: representa o usuário principal do sistema.
+// Armazena informações básicas e estabelece diversas relações com outros modelos.
+model User {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  telefone     String         @unique
+  senha        String
+  CreateIn     DateTime       @default(now())
+  updateIn     DateTime       @updatedAt
+  fornecedorId String?        // Relacionamento opcional com Comerciante
+  adderessid   String?        // Chave para relação com adderess
+  
+  // Relações:
+  afiliacoes   Afiliacao[]
+  catalogos    Catalogo[]
+  Comerciante   Comerciante?    @relation("UserToFornecedor")
+  localizacoes Localizacao[]
+  fornecedor   Comerciante?    @relation(fields: [fornecedorId], references: [id])
+  adderess     Adderess?      @relation(fields: [adderessid], references: [id])
+  permissoes   Userpermission[]
+  status       userStatus     @default(EXPLORADOR)
+  auditoria    Auditoria[]
+  UserStatus   UserStatus[]
+  // Relação para quando o usuário é promovido a criador de conteúdo
+  criador      Criador[]      @relation("UserToCriador")
+
+  Guardiao Guardiao[]
+
+Report    Report[]  @relation("user reporter")
+
+report Report[] @relation(name: "ReporterReports")
+
+  PaymentAudit PaymentAudit[]
+}
+
+// Modelo Comerciante: representa fornecedores na plataforma.
+// Contém dados comerciais e se relaciona com o modelo User.
+model Comerciante {
+  id           String         @id @default(cuid())
+  nomeNegocio  String         @unique
+  email        String         @unique
+  telefone     String
+  description  String
+  UserId       String         @unique
+  CreateIn     DateTime       @default(now())
+  updateIn     DateTime       @updatedAt
+  nif          String         @unique
+  user         User           @relation("UserToFornecedor", fields: [UserId], references: [id])
+  location  Localizacao[]
+  adderess    Adderess[]
+  product     Product[]
+  program    ProgramaAfiliados[]
+  branch      Branch[]
+  User         User[]         // Relação inversa adicional, se necessária
+
+  Auditoria Auditoria[]
+
+  Report Report[] @relation(name: "MerchantReports")
+
+  PaymentAudit PaymentAudit[]
+}
+
+// Modelo Criador: representa usuários que atuam como criadores de conteúdo.
+model Criador {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  telefone     String
+  description  String
+  UserId       String        @unique
+  CreateIn     DateTime      @default(now())
+  updateIn     DateTime      @updatedAt
+  nif          String        @unique
+  perfileName  String        @unique
+  User         User          @relation("UserToCriador", fields: [UserId], references: [id])
+  location  Localizacao[]
+  adderess    Adderess[]
+  product     Product[]
+  program    ProgramaAfiliados[]
+  branch      Branch[]
+
+  inscricao Inscricao[] @relation("UserInscrito")
+  Inscricao Inscricao[] @relation("UserPerfil")
+
+  Conteudo Conteudo[]
+
+  PaymentAudit PaymentAudit[]
+}
+
+// Modelo Guardiao: armazena dados adicionais para usuários promovidos a Guardião,
+model Guardiao {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id])
+  level       Int       @default(1)  // Define o nível hierárquico do guardião
+  description String?   
+  CreateIn    DateTime  @default(now())
+  updateIn    DateTime  @updatedAt
+
+  Report Report[] @relation(name: "GuardianReports")
+}
+
+
+// ========================= MODELOS DE LOCALIZAÇÃO E ENDEREÇO =========================
+//
+
+// Modelo Localizacao: armazena coordenadas geográficas, podendo estar associada a um Comerciante ou User.
+model Localizacao {
+  id          String      @id @default(cuid())
+  latitude    Float
+  longitude   Float
+  fornecedorId String?    // FK opcional para Comerciante
+  UserId      String?     // FK opcional para User
+  CreateIn    DateTime    @default(now())
+  updateIn    DateTime    @updatedAt
+  fornecedor  Comerciante? @relation(fields: [fornecedorId], references: [id])
+  User        User?       @relation(fields: [UserId], references: [id])
+  Criador     Criador[]   // Relação com Criador, se necessário
+}
+
+// Modelo Filial: representa uma filial de um Comerciante.
+// Cada filial possui um endereço único, vinculado através do campo adderessId.
+model Branch {
+  id           String      @id @default(cuid())
+  name         String
+  adderessId   String      @unique  // Cada filial possui um endereço único
+  fornecedorId String
+  CreateIn     DateTime    @default(now())
+  updateIn     DateTime    @updatedAt
+  fornecedor   Comerciante  @relation(fields: [fornecedorId], references: [id])
+  adderess     Adderess    @relation(fields: [adderessId], references: [id])
+  Criador     Criador[]   // Relação com Criador, se necessário
+}
+
+// Modelo adderess: armazena os details do endereço.
+// Pode estar relacionado a uma filial e a múltiplos usuários.
+model Adderess {
+  id       String   @id @default(cuid())
+  rua      String
+  cidade   String
+  estado   String
+  pais     String
+  zip      String
+  filial   Branch?  // Relação opcional com Filial
+  User     User[]   // Um endereço pode ser associado a vários usuários
+  Comerciante Comerciante[]
+  Criador Criador[]
+}
+
+//
+// ========================= MODELOS DE CATÁLOGO, PRODUTO, MENU E ITEM =========================
+//
+
+// Modelo Catalogo: armazena catálogos criados pelos usuários.
+model Catalogo {
+  id           String      @id @default(cuid())
+  name         String
+  description  String
+  CreateIn     DateTime    @default(now())
+  updateIn     DateTime    @updatedAt
+  UserId       String
+  User         User        @relation(fields: [UserId], references: [id])
+  menus        Menu[]
+  product     Product[]
+}
+
+// Modelo Product: representa os product cadastrados nos catálogos.
+model Product {
+  id               String         @id @default(cuid())
+  name             String
+  price            Float
+  CreateIn         DateTime       @default(now())
+  updateIn         DateTime       @updatedAt
+  catalogoId       String?        // Relacionamento opcional com Catalogo
+  disponibilidade Disponibilidade @default(DISPONIVEL)
+  fornecedorId     String
+  quantidade       Int
+  catalogo         Catalogo?      @relation(fields: [catalogoId], references: [id])
+  fornecedor       Comerciante     @relation(fields: [fornecedorId], references: [id])
+  Criador          Criador[]      // Relação com Criador, se o produto estiver associado a criadores
+
+  Report Report[]
+}
+
+// Modelo Menu: representa um menu dentro de um catálogo.
+model Menu {
+  id           String      @id @default(cuid())
+  name         String
+  CreateIn     DateTime    @default(now())
+  updateIn     DateTime    @updatedAt
+  catalogoId   String
+  itens        Item[]
+  catalogo     Catalogo    @relation(fields: [catalogoId], references: [id])
+}
+
+// Modelo Item: representa itens individuais dentro de um menu.
+model Item {
+  id           String      @id @default(cuid())
+  name         String
+  price        Float
+  menuId       String
+  CreateIn     DateTime    @default(now())
+  updateIn     DateTime    @updatedAt
+  menu         Menu        @relation(fields: [menuId], references: [id])
+}
+
+//
+// ========================= MODELOS DE AFILIACAO, PROGRAMA, AUDITORIA, CONTEÚDO E INSCRIÇÃO =========================
+//
+
+// Modelo Afiliacao: associa um usuário a um programa de afiliados.
+model Afiliacao {
+  id           String            @id @default(cuid())
+  UserId       String
+  programaId   String
+  CreateIn     DateTime          @default(now())
+  updateIn     DateTime          @updatedAt
+  programa     ProgramaAfiliados @relation(fields: [programaId], references: [id])
+  User         User              @relation(fields: [UserId], references: [id])
+}
+
+// Modelo ProgramaAfiliados: representa campanhas de afiliados criadas pelos fornecedores.
+model ProgramaAfiliados {
+  id           String        @id @default(cuid())
+  fornecedorId String
+  name         String
+  description  String
+  comissao     Float
+  CreateIn     DateTime      @default(now())
+  updateIn     DateTime      @updatedAt
+  afiliacoes   Afiliacao[]
+  fornecedor   Comerciante    @relation(fields: [fornecedorId], references: [id])
+  Criador      Criador[]     // Relação adicional se product também estiverem vinculados a criadores
+}
+
+// Modelo Auditoria: registra ações dos usuários para rastreabilidade e compliance.
+model Auditoria {
+  id       String   @id @default(cuid())
+  UserId   String
+  ComercianteId String
+  action     String
+  details String
+  CreateIn DateTime @default(now())
+  User     User     @relation(fields: [UserId], references: [id])
+  Comerciante Comerciante @relation(fields: [ComercianteId], references: [id])
+}
+
+// Modelo Report: recebe as denuncias feitas pelos usuarios 
+model Report {
+  id             String       @id @default(uuid()) // ID único da denúncia
+  reporter       User         @relation(name: "ReporterReports", fields: [reporterId], references: [id]) // Usuário que fez a denúncia
+  reporterId     String       
+  reported       Comerciante?    @relation(name: "MerchantReports", fields: [reportedId], references: [id]) // Comerciante denunciado
+  reportedId     String?      
+  product        Product?     @relation(fields: [productId], references: [id]) // Produto denunciado (se aplicável)
+  productId      String?      
+  category       ReportCategory
+  description    String      
+  status         ReportStatus @default(PENDING) // Status da denúncia
+  guardian       Guardiao?        @relation(name: "GuardianReports", fields: [guardianId], references: [id]) // Guardião/Admin que avalia
+  guardianId     String?      
+  createdAt      DateTime     @default(now()) // Data da denúncia
+  resolvedAt     DateTime?    // Data de resolução
+
+  User User[] @relation("user reporter")
+}
+
+
+
+
+// Modelo Conteudo: representa conteúdos (fotos, vídeos) postados por criadores.
+// Pode ter preço para acesso exclusivo e permite inscrições de outros usuários.
+model Conteudo {
+  id           String      @id @default(cuid())
+  titulo       String
+  description  String
+  urlFoto      String?
+  urlVideo     String?
+  price        Float?
+  CreateIn     DateTime    @default(now())
+  updateIn     DateTime    @updatedAt
+  CriadorId       String
+  Criador         Criador        @relation(fields: [CriadorId], references: [id])
+  inscritos    Inscricao[]
+}
+
+// Modelo Inscricao: associa usuários que se inscrevem em conteúdos ou perfis (similar a OnlyFans).
+model Inscricao {
+  id         String      @id @default(cuid())
+  UserId     String
+  perfilId   String
+  price       Boolean     @default(false)
+  CreateIn   DateTime    @default(now())
+  Criador       Criador        @relation("UserInscrito", fields: [UserId], references: [id])
+  perfil     Criador        @relation("UserPerfil", fields: [perfilId], references: [id])
+  Conteudo   Conteudo[]
+}
+
+// ============================= Metodos de pagamentos =================================================================
+
+model PaymentAudit {
+  id            String        @id @default(uuid())
+  user          User          @relation(fields: [userId], references: [id])
+  merchant      Comerciante   @relation(fields: [merchantId], references: [id])
+  creator       Criador       @relation(fields:[creatorId], references: [id])
+  creatorId     String
+  merchantId    String
+  userId        String
+  amount        Float
+  currency      String   // "AOA", "BRL", "USD"
+  paymentMethod paymentMethod
+  status        PaymentStatus @default(PENDING)
+  createdAt     DateTime @default(now())
+}
+

@@ -1,8 +1,8 @@
+import { randomUUID } from 'node:crypto'
+import { fatoriesCatalogo } from '@/use-case/factories/factories-catalogo'
+import { exibir } from '@/use-case/utils/exibir'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
-import { fatoriesCatalogo } from '@/use-case/factories/factories-catalogo'
-import { randomUUID } from 'node:crypto'
-import { exibir } from '@/use-case/utils/exibir'
 
 export async function CreateCatalog(
   request: FastifyRequest,

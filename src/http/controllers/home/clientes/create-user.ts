@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto'
-import { FactoriesUser } from '../../../../use-case/factories/factories-usuario'
-import { exibir } from '../../../../use-case/utils/exibir'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
+import { FactoriesUser } from '../../../../use-case/factories/factories-usuario'
+import { exibir } from '../../../../use-case/utils/exibir'
 
 export async function CadastroUSer(
   request: FastifyRequest,

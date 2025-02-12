@@ -1,9 +1,12 @@
 import { randomUUID } from 'node:crypto'
-import type { makeUsuario } from '../../use-case/make/make-Usuaro'
 import { $Enums, type Prisma, type Usuario } from '@prisma/client'
+import type { makeUsuario } from '../../use-case/make/make-Usuaro'
 import { DatabaseInMemoryFornecedor } from './inMemory-Fornecedor'
+import { exibir } from '@/use-case/utils/exibir'
 
 export class DatabaseInMemoryUsuario implements makeUsuario {
+
+
   public DATABASE: Usuario[] = []
 
   async Criar(data: Usuario) {
@@ -29,6 +32,18 @@ export class DatabaseInMemoryUsuario implements makeUsuario {
     this.DATABASE.push(user)
     return user
   }
+  async actualizarUsuario(email: string, fornecedorId: string): Promise<Usuario> {
+    throw new Error('Method not implemented.')
+  }
+
+  async findId(id: string): Promise<Usuario | null> {
+    const usuario = this.DATABASE.find(item => item.id === id)
+
+    if (!usuario) {
+      return null
+    }
+    return usuario
+  }
 
   async alterarSenha(email: string, novaSenha: string): Promise<Usuario> {
     const usuario = this.DATABASE.find(item => {
@@ -44,7 +59,12 @@ export class DatabaseInMemoryUsuario implements makeUsuario {
     return usuario
   }
 
-  async ProcurarGmail(email: string): Promise<Usuario> {
-    throw new Error('Method not implemented.')
+  async ProcurarGmail(email: string): Promise<Usuario | null > {
+    const usuario = this.DATABASE.find(item => item.email === email)
+    if(!usuario){
+      return null
+    }
+    return usuario
+
   }
 }

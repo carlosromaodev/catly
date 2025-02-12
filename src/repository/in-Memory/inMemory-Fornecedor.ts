@@ -1,20 +1,23 @@
 import { randomUUID } from 'node:crypto'
-import { prisma } from '../../lib/connect-prisma'
-import type { makeUsuario } from '../../use-case/make/make-Usuaro'
-import type {
-  fornecedor,
-  makeFornecedor,
-} from '../../use-case/make/make-fornecedor'
-import {
-  $Enums,
-  type Fornecedor,
-  type Prisma,
-  type Usuario,
-} from '@prisma/client'
+import { prisma } from '@/lib/connect-prisma'
+import type { makeUsuario } from '@/use-case/make/make-Usuaro'
+import type { makeFornecedor } from '@/use-case/make/make-fornecedor'
+import type { Fornecedor } from '@prisma/client'
 import { DatabaseInMemoryUsuario } from './inMemory-Usuario'
 
 export class DatabaseInMemoryFornecedor implements makeFornecedor {
   public DATABASE: Fornecedor[] = []
+
+  async procurarFornecedorId(id: string): Promise<Fornecedor | null> {
+    const fornecedor = this.DATABASE.find(valor => id)
+
+    if (!fornecedor) {
+      throw new Error()
+    }
+    return fornecedor
+  }
+
+  async procurarFornecedorEmail(email: string): Promise<Fornecedor | null> {}
 
   async actualizar(data: Fornecedor) {
     const id = new DatabaseInMemoryUsuario().DATABASE.find(
@@ -23,7 +26,7 @@ export class DatabaseInMemoryFornecedor implements makeFornecedor {
     if (!id?.id) {
       throw new Error()
     }
-    const novoFornecedor: Fornecedor = {
+    const novoFornecedor = {
       email: data.email,
       nif: data.nif,
       nomeNegocio: data.nomeNegocio,

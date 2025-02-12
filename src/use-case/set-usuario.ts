@@ -1,11 +1,11 @@
-import type { makeUsuario } from './make/make-Usuaro'
-import { exibir } from './utils/exibir'
-import { Prisma, type Usuario } from '@prisma/client'
+import type { User } from '@prisma/client'
 import { hash } from 'bcryptjs'
-import type { makeFornecedor } from './make/make-fornecedor'
 import { prisma } from '../lib/connect-prisma'
+import type { makeUser } from './make/make-Usuaro'
+import type { makeMerchant } from './make/make-fornecedor'
+import { exibir } from './utils/exibir'
 
-interface RequestUsuario {
+interface RequestUser {
   id: string
   nome: string
   email: string
@@ -13,32 +13,28 @@ interface RequestUsuario {
   senha: string
 }
 
-interface ResponseUsuario {
-  usuario: Usuario
+interface ResponseUser {
+  usuario: User
 }
 
 /**
- * Serviço para manipulação de usuários
+ * Coleta e manipulação de usuários
  * @param date - Dados do usuário para criação
- * @returns - Objeto contendo o usuário criado
  */
-export class FetchUsuario {
+
+export class userController {
   constructor(
-    private funcoes: makeUsuario,
-    private funcoesFornecedor: makeFornecedor
+    private userFunction: makeUser,
+    private merchantFunction: makeMerchant
   ) {}
 
-  /**
-   * Cria um novo usuário no banco de dados
-   * @param date - Dados do usuário a ser criado
-   * @returns - O usuário criado
-   */
-  async createUser(date: RequestUsuario): Promise<ResponseUsuario> {
+  async createUser(date: RequestUser): Promise<ResponseUser> {
     try {
       exibir.info(`Iniciando criação do usuário com email: ${date.email}`)
 
-      // Verifica se o email já existe no banco de dados
-      const userEmail = await this.funcoes.ProcurarGmail(date.email)
+      // [x] Verifica se o email já existe no banco de dados -----------------------------------------------------------
+
+      const userEmail = await this.userFunction.ProcurarGmail(date.email)
       if (userEmail) {
         exibir.fatal(
           `Tentativa de criar usuário com email já existente: ${date.email}`
@@ -46,7 +42,7 @@ export class FetchUsuario {
         throw new Error('Email já cadastrado.')
       }
       const senhaHash = await hash(date.senha, 6)
-      const usuario = await this.funcoes.Criar({
+      const usuario = await this.userFunction.Criar({
         email: date.email,
         nome: date.nome,
         senha: senhaHash,
@@ -72,8 +68,8 @@ export class FetchUsuario {
    * @returns - O usuário criado
    */
 
-  async findUser(email: string): Promise<ResponseUsuario> {
-    const usuario = await this.funcoes.ProcurarGmail(email)
+  async findUser(email: string): Promise<ResponseUser> {
+    const usuario = await this.userFunction.ProcurarGmail(email)
     if (!usuario) {
       throw new Error()
     }
@@ -86,14 +82,14 @@ export class FetchUsuario {
    * @returns - O usuário criado
    */
 
-  async actualizarUser(email: string): Promise<ResponseUsuario> {
-    const VerificarUsuario = await this.funcoes.ProcurarGmail(email)
+  async actualizarUser(email: string): Promise<ResponseUser> {
+    const VerificarUsuario = await this.userFunction.ProcurarGmail(email)
     if (!VerificarUsuario) {
       throw new Error()
     }
 
     const idFornecedor =
-      await this.funcoesFornecedor.procurarFornecedorEmail(email)
+      await this.merchantFunction.procurarFornecedorEmail(email)
     if (!idFornecedor) {
       throw new Error()
     }

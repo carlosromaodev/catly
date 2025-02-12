@@ -1,6 +1,6 @@
+import { randomUUID } from 'node:crypto'
 import type { Produto } from '@prisma/client'
 import type { makeeProduct } from './make/make-produtos'
-import { randomUUID } from 'node:crypto'
 
 interface requestProduto {
   nome: string

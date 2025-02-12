@@ -1,7 +1,7 @@
-import { FactoriesAuth } from '../../../../use-case/factories/factories-auth'
-import { exibir } from '../../../../use-case/utils/exibir'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
+import { FactoriesAuth } from '../../../../use-case/factories/factories-auth'
+import { exibir } from '../../../../use-case/utils/exibir'
 
 export async function Auth(request: FastifyRequest, reply: FastifyReply) {
   const schemaDados = z.object({

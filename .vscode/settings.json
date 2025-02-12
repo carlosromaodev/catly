@@ -1,9 +1,6 @@
 {
-  "cSpell.words": [
-    "caso"
-  ],
+  "cSpell.words": ["caso"],
   "scripts": {
-  "format": "biome format"
-}
-
+    "format": "biome format"
+  }
 }

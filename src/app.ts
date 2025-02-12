@@ -1,8 +1,8 @@
+import fastifyCookie from '@fastify/cookie'
 import fastifyJwt from '@fastify/jwt'
 import fastify from 'fastify'
 import { env } from './env'
 import { RouteHome } from './http/controllers/home'
-import fastifyCookie from '@fastify/cookie'
 
 export const app = fastify()
 app.register(fastifyCookie, {})
