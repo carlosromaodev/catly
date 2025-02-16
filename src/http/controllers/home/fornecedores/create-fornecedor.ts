@@ -3,7 +3,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 import { FactoriesFornecedor } from '@/use-case/factories/factories-fornecedor'
 import { FactoriesUser } from '@/use-case/factories/factories-usuario'
-import { FetchUsuario } from '../../../../use-case/set-usuario'
+import { FetchUsuario } from '../../../../use-case/controller-user'
 import { exibir } from '../../../../use-case/utils/exibir'
 
 export async function CadastroFornecedor(
@@ -11,7 +11,7 @@ export async function CadastroFornecedor(
   reply: FastifyReply
 ) {
   // * SCHEMA PARA VALIDAR OS DADOS PROVENIENTES DO REQUEST BODY *
-  
+
   const usuario = await request.jwtVerify()
   const shemaFornecedor = z.object({
     nome: z.string(),

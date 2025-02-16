@@ -5,8 +5,8 @@ import { env } from './env'
 import { RouteHome } from './http/controllers/home'
 
 export const app = fastify()
-app.register(fastifyCookie, {})
 
+app.register(fastifyCookie, {})
 app.register(fastifyJwt, {
   secret: env.KEYJWT,
   cookie: {

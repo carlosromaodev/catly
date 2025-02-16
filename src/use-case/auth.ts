@@ -2,7 +2,7 @@ import type { Usuario } from '@prisma/client'
 import { compare, hash } from 'bcryptjs'
 import bcrypt from 'bcryptjs'
 import { ErrorAuth } from './error/erro-auth'
-import type { makeUsuario } from './make/make-Usuaro'
+import type { makeUsuario } from './make/make-User'
 import { exibir } from './utils/exibir'
 
 interface RequestAuth {

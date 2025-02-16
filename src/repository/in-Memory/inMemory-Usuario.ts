@@ -1,70 +1,87 @@
 import { randomUUID } from 'node:crypto'
-import { $Enums, type Prisma, type Usuario } from '@prisma/client'
-import type { makeUsuario } from '../../use-case/make/make-Usuaro'
-import { DatabaseInMemoryFornecedor } from './inMemory-Fornecedor'
-import { exibir } from '@/use-case/utils/exibir'
+import type { makeUser } from '../../use-case/make/make-User'
+import { exibir } from '../../use-case/utils/exibir'
+import type { User } from '.prisma/client'
+import { UserError } from '../../use-case/error/error-user'
 
-export class DatabaseInMemoryUsuario implements makeUsuario {
+export class DatabaseInMemoryUsuario implements makeUser {
+  public DATABASE: User[] = []
 
+  //*===================================== BANCO DE DADOS NA MEMORIA =====================================================
 
-  public DATABASE: Usuario[] = []
-
-  async Criar(data: Usuario) {
-    const id = new DatabaseInMemoryFornecedor().DATABASE.find(
-      item => data.email === item.email
-    )
-    if (!id) {
-      throw new Error()
-    }
-
-    const user: Usuario = {
+  //================ //* METODO USADO PARA CRIAR USUARIO NO BANCO
+  async Create(date: User): Promise<User> {
+    const newUser: User = {
       id: randomUUID(),
-      email: 'cromao@gmail.com',
-      nome: 'carlos romao',
-      telefone: '940999794',
-      senha: '1234Cr',
-      role: $Enums.Role.USUARIO,
-      criadoEm: new Date(),
-      atualizadoEm: new Date(),
-      fornecedorId: id?.id,
+      name: date.name,
+      password: date.password,
+      email: date.email,
+      phone: date.phone,
+      updateIn: new Date(),
+      CreateIn: new Date(),
+      status: 'EXPLORADOR',
+      adderessid: null,
+      merchantId: null,
     }
 
-    this.DATABASE.push(user)
-    return user
-  }
-  async actualizarUsuario(email: string, fornecedorId: string): Promise<Usuario> {
-    throw new Error('Method not implemented.')
+    if (!newUser) {
+      exibir.fatal('Erro ao criar usuario (INMEMORY)')
+      throw new UserError('erro no login')
+    }
+
+    this.DATABASE.push(newUser)
+
+    return newUser
   }
 
-  async findId(id: string): Promise<Usuario | null> {
-    const usuario = this.DATABASE.find(item => item.id === id)
+  //================ //* METODO USADO PARA BUSCAR USUARIO PELO EMAIL
 
-    if (!usuario) {
+  async FindEmail(email: string): Promise<User | null> {
+    const User = this.DATABASE.find(item => item.email === email)
+
+    if (!User) {
+      exibir.fatal('Erro ao criar usuario')
       return null
     }
-    return usuario
+
+    return User
   }
 
-  async alterarSenha(email: string, novaSenha: string): Promise<Usuario> {
-    const usuario = this.DATABASE.find(item => {
-      if (item.email === email) {
-        item.senha = novaSenha
-      }
-    })
+  //================ //* METODO USADO PARA BUSCAR USUARIO PELO ID
 
-    if (!usuario) {
-      throw new Error()
-    }
+  async findId(id: string): Promise<User | null> {
+    const User = this.DATABASE.find(item => item.id === id)
 
-    return usuario
-  }
-
-  async ProcurarGmail(email: string): Promise<Usuario | null > {
-    const usuario = this.DATABASE.find(item => item.email === email)
-    if(!usuario){
+    if (!User) {
+      exibir.fatal('Erro ao criar usuario')
       return null
     }
-    return usuario
 
+    return User
+  }
+
+  //================ //* METODO USADO PARA ALTERAR A SENHA DO USUARIO
+
+  async ChangePassword(email: string, newPassword: string): Promise<User> {
+    const User = this.DATABASE.find(item => item.email === email)
+
+    if (!User) {
+      exibir.fatal('Erro ao Trocar a Senha, usuario não encontrado ')
+      throw new UserError('erro no login')
+    }
+    User.password = newPassword
+    return User
+  }
+  //================ //* METODO USADO PARA ALTERAR O NOME DO USUARIO
+
+  async ChangeName(email: string, newName: string): Promise<User> {
+    const User = this.DATABASE.find(item => item.email === email)
+
+    if (!User) {
+      exibir.fatal('Erro ao Trocar a Senha, usuario não encontrado ')
+      throw new UserError('erro no login')
+    }
+    User.name = newName
+    return User
   }
 }

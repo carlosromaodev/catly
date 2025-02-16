@@ -4,8 +4,8 @@
   "description": "Catly API",
   "main": "index.js",
   "scripts": {
-    "test": "vitest run --dir src/services",
-    "test:watch": "vitest --dir src/services",
+    "test": "vitest run --dir src/use-case",
+    "test:watch": "vitest --dir src/use-case",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "test:preparar": "npm link ./prisma/vitest-environment-prisma",
@@ -24,7 +24,7 @@
     "@biomejs/biome": "1.9.1",
     "@rocketseat/eslint-config": "^2.2.2",
     "@types/bcryptjs": "2.4.6",
-    "@types/node": "^22.0.2",
+    "@types/node": "^22.13.4",
     "@types/supertest": "6.0.2",
     "@vitest/coverage-v8": "2.0.5",
     "@vitest/ui": "2.0.5",
@@ -42,6 +42,7 @@
   "dependencies": {
     "@fastify/cookie": "11.0.1",
     "@fastify/jwt": "9.0.1",
+    "@fastify/swagger": "^9.4.2",
     "@prisma/client": "5.17.0",
     "bcryptjs": "2.4.3",
     "dayjs": "1.11.13",

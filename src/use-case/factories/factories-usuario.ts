@@ -1,5 +1,5 @@
 import { DatabasePrismaUsuario } from '../../repository/in-Prisma/Bd-Prisma-Usuario'
-import { FetchUsuario } from '../set-usuario'
+import { FetchUsuario } from '../controller-user'
 
 export function FactoriesUser() {
   const DATABASE = new DatabasePrismaUsuario()

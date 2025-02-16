@@ -1,6 +1,6 @@
 import type { Fornecedor } from '@prisma/client'
 import { prisma } from '../../lib/connect-prisma'
-import type { makeFornecedor } from '../../use-case/make/make-fornecedor'
+import type { makeFornecedor } from '../../use-case/make/make-merchant'
 
 export class DatabasePrismaFornecedor implements makeFornecedor {
   async procurarFornecedorEmail(email: string): Promise<Fornecedor | null> {

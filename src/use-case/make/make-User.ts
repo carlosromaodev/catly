@@ -1,15 +1,8 @@
-import type { Comerciante, User } from '@prisma/client'
-export interface User {
-  email: string
-  nome: string
-  senha: string
-  telefone: string
-  id: string
-}
+import type { User } from '@prisma/client'
 
 export interface makeUser {
 
-  Create(data: User): Promise<User>
+  Create(date: User): Promise<User>
   FindEmail(email: string): Promise<User | null>
   findId(id: string): Promise<User | null>
   ChangePassword(email: string, newPassword: string): Promise<User>

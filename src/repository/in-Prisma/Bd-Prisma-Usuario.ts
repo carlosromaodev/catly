@@ -1,9 +1,10 @@
 import type { Prisma, Usuario } from '@prisma/client'
 import { prisma } from '../../lib/connect-prisma'
 import { FactoriesFornecedor } from '../../use-case/factories/factories-fornecedor'
-import type { makeUsuario } from '../../use-case/make/make-Usuaro'
+import type { makeUsuario } from '../../use-case/make/make-User'
 
 export class DatabasePrismaUsuario implements makeUsuario {
+
   async actualizarUsuario(email: string): Promise<Usuario> {
     const fornecedor = FactoriesFornecedor().findFornecedorEmail(email)
     const usuarioAtualizado = await prisma.usuario.update({

@@ -34,7 +34,7 @@ enum userStatus {
 // Inclui papéis básicos e funções específicas para diferentes perfis.
 enum roleEnum {
   User
-  FORNECEDOR
+  merchant
   DISTRIBUIDOR
   ENTREGADOR
   GERENTE_RELACIONAMENTO
@@ -141,19 +141,19 @@ model User {
   id           String         @id @default(cuid())
   name         String
   email        String         @unique
-  telefone     String         @unique
-  senha        String
+  phone     String         @unique
+  password        String
   CreateIn     DateTime       @default(now())
   updateIn     DateTime       @updatedAt
-  fornecedorId String?        // Relacionamento opcional com Comerciante
+  merchantId String?        // Relacionamento opcional com Comerciante
   adderessid   String?        // Chave para relação com adderess
   
   // Relações:
   afiliacoes   Afiliacao[]
   catalogos    Catalogo[]
-  Comerciante   Comerciante?    @relation("UserToFornecedor")
+  Comerciante   Comerciante?    @relation("UserTomerchant")
   localizacoes Localizacao[]
-  fornecedor   Comerciante?    @relation(fields: [fornecedorId], references: [id])
+  merchant   Comerciante?    @relation(fields: [merchantId], references: [id])
   adderess     Adderess?      @relation(fields: [adderessid], references: [id])
   permissoes   Userpermission[]
   status       userStatus     @default(EXPLORADOR)
@@ -171,19 +171,19 @@ report Report[] @relation(name: "ReporterReports")
   PaymentAudit PaymentAudit[]
 }
 
-// Modelo Comerciante: representa fornecedores na plataforma.
+// Modelo Comerciante: representa merchantes na plataforma.
 // Contém dados comerciais e se relaciona com o modelo User.
 model Comerciante {
   id           String         @id @default(cuid())
   nomeNegocio  String         @unique
   email        String         @unique
-  telefone     String
+  phone     String
   description  String
   UserId       String         @unique
   CreateIn     DateTime       @default(now())
   updateIn     DateTime       @updatedAt
   nif          String         @unique
-  user         User           @relation("UserToFornecedor", fields: [UserId], references: [id])
+  user         User           @relation("UserTomerchant", fields: [UserId], references: [id])
   location  Localizacao[]
   adderess    Adderess[]
   product     Product[]
@@ -202,7 +202,7 @@ model Comerciante {
 model Criador {
   id           String        @id @default(cuid())
   email        String        @unique
-  telefone     String
+  phone     String
   description  String
   UserId       String        @unique
   CreateIn     DateTime      @default(now())
@@ -246,11 +246,11 @@ model Localizacao {
   id          String      @id @default(cuid())
   latitude    Float
   longitude   Float
-  fornecedorId String?    // FK opcional para Comerciante
+  merchantId String?    // FK opcional para Comerciante
   UserId      String?     // FK opcional para User
   CreateIn    DateTime    @default(now())
   updateIn    DateTime    @updatedAt
-  fornecedor  Comerciante? @relation(fields: [fornecedorId], references: [id])
+  merchant  Comerciante? @relation(fields: [merchantId], references: [id])
   User        User?       @relation(fields: [UserId], references: [id])
   Criador     Criador[]   // Relação com Criador, se necessário
 }
@@ -261,10 +261,10 @@ model Branch {
   id           String      @id @default(cuid())
   name         String
   adderessId   String      @unique  // Cada filial possui um endereço único
-  fornecedorId String
+  merchantId String
   CreateIn     DateTime    @default(now())
   updateIn     DateTime    @updatedAt
-  fornecedor   Comerciante  @relation(fields: [fornecedorId], references: [id])
+  merchant   Comerciante  @relation(fields: [merchantId], references: [id])
   adderess     Adderess    @relation(fields: [adderessId], references: [id])
   Criador     Criador[]   // Relação com Criador, se necessário
 }
@@ -310,10 +310,10 @@ model Product {
   updateIn         DateTime       @updatedAt
   catalogoId       String?        // Relacionamento opcional com Catalogo
   disponibilidade Disponibilidade @default(DISPONIVEL)
-  fornecedorId     String
+  merchantId     String
   quantidade       Int
   catalogo         Catalogo?      @relation(fields: [catalogoId], references: [id])
-  fornecedor       Comerciante     @relation(fields: [fornecedorId], references: [id])
+  merchant       Comerciante     @relation(fields: [merchantId], references: [id])
   Criador          Criador[]      // Relação com Criador, se o produto estiver associado a criadores
 
   Report Report[]
@@ -356,17 +356,17 @@ model Afiliacao {
   User         User              @relation(fields: [UserId], references: [id])
 }
 
-// Modelo ProgramaAfiliados: representa campanhas de afiliados criadas pelos fornecedores.
+// Modelo ProgramaAfiliados: representa campanhas de afiliados criadas pelos merchantes.
 model ProgramaAfiliados {
   id           String        @id @default(cuid())
-  fornecedorId String
+  merchantId String
   name         String
   description  String
   comissao     Float
   CreateIn     DateTime      @default(now())
   updateIn     DateTime      @updatedAt
   afiliacoes   Afiliacao[]
-  fornecedor   Comerciante    @relation(fields: [fornecedorId], references: [id])
+  merchant   Comerciante    @relation(fields: [merchantId], references: [id])
   Criador      Criador[]     // Relação adicional se product também estiverem vinculados a criadores
 }
 

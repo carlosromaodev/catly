@@ -1,6 +1,6 @@
 import { DatabasePrismaUsuario } from '../../repository/in-Prisma/Bd-Prisma-Usuario'
 import { DatabasePrismaFornecedor } from '../../repository/in-Prisma/Bd-Prismo-Fornecedor'
-import { ForneceedorCreate } from '../set-fornecedor'
+import { ForneceedorCreate } from '../controller-merchant'
 
 export function FactoriesFornecedor() {
   const DATABASEUSUARIO = new DatabasePrismaUsuario()
