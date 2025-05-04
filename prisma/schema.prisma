@@ -3,7 +3,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Fonte de dados: conexão com o PostgreSQL via variável de ambiente
+//* Fonte de dados: conexão com o PostgreSQL via variável de ambiente
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -13,49 +13,51 @@ datasource db {
 // ========================= ENUMS =========================
 //
 
-// Enum Disponibilidade: usado para indicar se um produto está disponível ou não.
+//* Enum Disponibilidade: usado para indicar se um produto está disponível ou não.
 enum Disponibilidade {
   DISPONIVEL
   INDISPONIVEL
 }
 
-// Enum userStatus: define os status que um usuário pode ter na plataforma.
+//* Enum userStatus: define os status que um usuário pode ter na plataforma.
 enum userStatus {
-  EXPLORADOR
-  COMERCIAL
-  TRASNPORTADOR
-  GUARDIAO
-  INFLUENCIADOR
-  MEDIADOR
-  CRIADOR
+  Explorador
+  CriadorDeConteudo
+  FornecedorDeServicos
+  VendedorDeProdutos
+  GestorDeComunidade
 }
 
-// Enum roleEnum: define os papéis (roles) disponíveis no sistema.
-// Inclui papéis básicos e funções específicas para diferentes perfis.
+//* Enum roleEnum: define os papéis (roles) disponíveis no sistema.
+
 enum roleEnum {
-  User
-  merchant
-  DISTRIBUIDOR
-  ENTREGADOR
-  GERENTE_RELACIONAMENTO
-  ADMINISTRADOR
-  LOGISTA
-  COMERCIANTE
+  EXPLORADOR
+  CRIADOR_DE_CONTEUDO
+  INFLUENCIADOR
   ARTISTA
-  PRODUTOR
-  INFLUENTE
-  CINEMATOGRAFICO
+  PRODUTOR_DE_VIDEO
+  PODCASTER
   YOUTUBER
-  BLOGUEIRO
-  PODCAST
-  FOTOGRAFO
-  EDUCACAO
-  TIKTOKER
+  VENDEDOR_DE_PRODUTOS_DIGITAIS
+  VENDEDOR_DE_PRODUTOS_FISICOS
+  DESIGNER_DIGITAL
   COMEDIANTE
+  MUSICO
+  MODELO
+  INFLUENCIADOR_ADULTO
+  MENTOR
+  COACH_DE_CARREIRA
+  PROFESSOR_PARTICULAR
+  CURADOR_DE_CONTEUDO
+  GERENTE_DE_ECOMMERCE
+  CONSULTOR
+  PERSONAL_TRAINER
+  
 }
 
-// enum ReportStatus
-// inclui todas as opçoẽs status para reportagens
+//* enum ReportStatus
+//* inclui todas as opçoẽs status para reportagens
+
 enum ReportStatus {
   PENDING
   IN_REVIEW
@@ -64,11 +66,11 @@ enum ReportStatus {
 }
 
 enum ReportCategory {
-  FRAUDE
-  CONTEUDO_INAPROPRIADO 
+  FRAUD
+  INAPPROPRIATE_CONTENT
   SPAM
-  ATENDIMENTO_RUIM 
-  OUTROS
+  POOR_SERVICE
+  OTHER
 }
 
 enum PaymentStatus {
@@ -83,14 +85,16 @@ enum paymentMethod {
   TRANSFERENCIA_BANCARIA
   PAGAMENTO_POR_REFERENCIA
   PAGAMENTO_NA_ENTREGA
-}
+  PAGAMENTO_CODIGO_QR
+}  
+
 //
-// ========================= MODELOS DE PERMISSÕES =========================
+// =========================================== MODELOS DE PERMISSÕES ===================================================
 //
 
-// Modelo Role: representa um papel que pode ser atribuído aos usuários.
-// Contém um identificador, name, descrição e o valor do enum roleEnum (roleUser).
-// Relaciona-se com o modelo permission via a relação "permissionRole".
+// *Modelo Role: representa um papel que pode ser atribuído aos usuários.
+//* Relaciona-se com o modelo permission via a relação "permissionRole".
+
 model Role {
   id            String        @id @default(cuid())
   name          String
@@ -109,7 +113,7 @@ model permission {
   Userpermission Userpermission[]
 }
 
-// Modelo Userpermission: tabela associativa que liga usuários a permissões (muitos para muitos).
+// Modelo Userpermissi       on: tabela associativa que liga usuários a permissões (muitos para muitos).
 model Userpermission {
   id            String        @id @default(cuid())
   UserId        String
@@ -132,96 +136,132 @@ model UserStatus {
 }
 
 //
-// ========================= MODELOS PRINCIPAIS =========================
+// =============================================== MODELOS PRINCIPAIS ==================================================
 //
-
 // Modelo User: representa o usuário principal do sistema.
 // Armazena informações básicas e estabelece diversas relações com outros modelos.
 model User {
   id           String         @id @default(cuid())
   name         String
   email        String         @unique
-  phone     String         @unique
-  password        String
+  phone        String         @unique
+  password     String
   CreateIn     DateTime       @default(now())
   updateIn     DateTime       @updatedAt
-  merchantId String?        // Relacionamento opcional com Comerciante
   adderessid   String?        // Chave para relação com adderess
   
   // Relações:
   afiliacoes   Afiliacao[]
   catalogos    Catalogo[]
-  Comerciante   Comerciante?    @relation("UserTomerchant")
   localizacoes Localizacao[]
-  merchant   Comerciante?    @relation(fields: [merchantId], references: [id])
-  adderess     Adderess?      @relation(fields: [adderessid], references: [id])
-  permissoes   Userpermission[]
-  status       userStatus     @default(EXPLORADOR)
+  merchant     Merchant?   
+  adderess     Adderess? 
+  permission   Userpermission[]
+  status       userStatus         @default(Explorador)
   auditoria    Auditoria[]
   UserStatus   UserStatus[]
   // Relação para quando o usuário é promovido a criador de conteúdo
-  criador      Criador[]      @relation("UserToCriador")
+  criador      Criador?         @relation("UserToCriador")
 
-  Guardiao Guardiao[]
+  Guardiao Guardiao?
 
-Report    Report[]  @relation("user reporter")
+  Report  Report[]               @relation("user reporter")
 
-report Report[] @relation(name: "ReporterReports")
+  report Report[]                @relation(name: "ReporterReports")
 
   PaymentAudit PaymentAudit[]
 }
 
-// Modelo Comerciante: representa merchantes na plataforma.
+// Modelo Merchant: representa merchantes na plataforma.
 // Contém dados comerciais e se relaciona com o modelo User.
-model Comerciante {
-  id           String         @id @default(cuid())
-  nomeNegocio  String         @unique
-  email        String         @unique
-  phone     String
-  description  String
-  UserId       String         @unique
-  CreateIn     DateTime       @default(now())
-  updateIn     DateTime       @updatedAt
-  nif          String         @unique
-  user         User           @relation("UserTomerchant", fields: [UserId], references: [id])
-  location  Localizacao[]
-  adderess    Adderess[]
-  product     Product[]
-  program    ProgramaAfiliados[]
-  branch      Branch[]
-  User         User[]         // Relação inversa adicional, se necessária
+model Merchant {
+    id              String      @id @default(cuid())
+    userId          String      @unique
+    businessName    String      @unique // Nome do negócio
+    email           String      @unique
+    phone           String
+    bi              String      @unique // Bilhete de Identidade
+    nif             String      @unique // Número de Identificação Fiscal
+    description     String      // Descrição do negócio
 
-  Auditoria Auditoria[]
+    // Imagens
+    profileImage    String?     // URL da foto de perfil do Merchant
+    coverImage      String?     // URL da foto de capa do Merchant
 
-  Report Report[] @relation(name: "MerchantReports")
+    // Dados Bancários
+    bank            String?      // Nome do banco
+    ibanOfBank      String?      // IBAN
+    numberBank      String?      // Número da conta
 
-  PaymentAudit PaymentAudit[]
+    // Redes Sociais e Contato
+    instagram       String?
+    whatsapp        String?
+    facebook        String?
+    website         String?
+    
+    // Localização
+    locationId      String?      @unique
+    addressId       String?      @unique
+
+    // Horário de Funcionamento
+    hoursOfOperation String?     // Exemplo: "Seg-Sex 08:00-18:00, Sáb 09:00-14:00"
+
+    // Status do Merchant
+    isVerified      Boolean      @default(false) // Indica se a conta está verificada
+    isActive        Boolean      @default(true)  // Se o Merchant ainda está ativo
+
+    // Relações
+    user            User?        @relation(fields: [userId], references: [id])
+    location        Localizacao? @relation(fields: [locationId], references: [id])
+    address         Adderess?
+    catalogos       Catalogo[]
+    products        Product[]
+    afiliacoes      Afiliacao[]
+    reports         Report[]    @relation("MerchantReports")
+    payments        PaymentAudit[]
+    auditoria       Auditoria[]
+
+    // Timestamps
+    createdAt       DateTime    @default(now())
+    updatedAt       DateTime    @updatedAt
+
+
+    Branch Branch[]
+
+    ProgramaAfiliados ProgramaAfiliados[]
 }
+
 
 // Modelo Criador: representa usuários que atuam como criadores de conteúdo.
 model Criador {
   id           String        @id @default(cuid())
   email        String        @unique
-  phone     String
+  phone        String
   description  String
   UserId       String        @unique
   CreateIn     DateTime      @default(now())
   updateIn     DateTime      @updatedAt
-  nif          String        @unique
+  birthday     DateTime       
   perfileName  String        @unique
   User         User          @relation("UserToCriador", fields: [UserId], references: [id])
-  location  Localizacao[]
-  adderess    Adderess[]
-  product     Product[]
-  program    ProgramaAfiliados[]
+  location     Localizacao?  @relation(fields: [locationid], references: [id])
+  locationid   String?
+  adderess     Adderess?
+   adderessid  String?
+  product      Product[]
+  program     ProgramaAfiliados[]
   branch      Branch[]
 
-  inscricao Inscricao[] @relation("UserInscrito")
-  Inscricao Inscricao[] @relation("UserPerfil")
+  inscricao   Inscricao[] @relation("UserInscrito")
 
-  Conteudo Conteudo[]
+
+  Conteudo     Conteudo[]
 
   PaymentAudit PaymentAudit[]
+
+  Catalogo     Catalogo[]
+
+  Inscricao    Inscricao[] @relation("UserPerfil")
 }
 
 // Modelo Guardiao: armazena dados adicionais para usuários promovidos a Guardião,
@@ -241,21 +281,22 @@ model Guardiao {
 // ========================= MODELOS DE LOCALIZAÇÃO E ENDEREÇO =========================
 //
 
-// Modelo Localizacao: armazena coordenadas geográficas, podendo estar associada a um Comerciante ou User.
+// Modelo Localizacao: armazena coordenadas geográficas, podendo estar associada a um Merchant ou User.
 model Localizacao {
   id          String      @id @default(cuid())
   latitude    Float
   longitude   Float
-  merchantId String?    // FK opcional para Comerciante
-  UserId      String?     // FK opcional para User
+  merchantId String?  @unique   
+ UserId      String?     
   CreateIn    DateTime    @default(now())
   updateIn    DateTime    @updatedAt
-  merchant  Comerciante? @relation(fields: [merchantId], references: [id])
+  merchant  Merchant? 
   User        User?       @relation(fields: [UserId], references: [id])
   Criador     Criador[]   // Relação com Criador, se necessário
 }
 
-// Modelo Filial: representa uma filial de um Comerciante.
+// Modelo Filial: representa uma filial de um Merchant.
+
 // Cada filial possui um endereço único, vinculado através do campo adderessId.
 model Branch {
   id           String      @id @default(cuid())
@@ -264,24 +305,31 @@ model Branch {
   merchantId String
   CreateIn     DateTime    @default(now())
   updateIn     DateTime    @updatedAt
-  merchant   Comerciante  @relation(fields: [merchantId], references: [id])
+  merchant   Merchant  @relation(fields: [merchantId], references: [id])
   adderess     Adderess    @relation(fields: [adderessId], references: [id])
   Criador     Criador[]   // Relação com Criador, se necessário
 }
 
 // Modelo adderess: armazena os details do endereço.
 // Pode estar relacionado a uma filial e a múltiplos usuários.
+
 model Adderess {
-  id       String   @id @default(cuid())
-  rua      String
-  cidade   String
-  estado   String
-  pais     String
-  zip      String
-  filial   Branch?  // Relação opcional com Filial
-  User     User[]   // Um endereço pode ser associado a vários usuários
-  Comerciante Comerciante[]
-  Criador Criador[]
+  id                String   @id @default(cuid())
+  street            String
+  city              String
+  state             String
+  country           String
+  description       String
+
+  merchantId     String  @unique 
+  creatorId         String  @unique 
+  UserId            String  @unique 
+
+
+ filial            Branch?  // Relação opcional com Filial
+  User              User        @relation(fields: [UserId], references: [id])
+  Merchant       Merchant @relation(fields: [merchantId], references: [id])
+  Criador           Criador     @relation(fields: [creatorId], references: [id])
 }
 
 //
@@ -295,10 +343,16 @@ model Catalogo {
   description  String
   CreateIn     DateTime    @default(now())
   updateIn     DateTime    @updatedAt
-  UserId       String
-  User         User        @relation(fields: [UserId], references: [id])
+  merchantId       String
+  creatorId      String       @unique
+  merchant   Merchant        @relation(fields: [merchantId], references: [id])
+  creator    Criador        @relation(fields: [creatorId], references: [id])
+
+
   menus        Menu[]
   product     Product[]
+
+  User User[]
 }
 
 // Modelo Product: representa os product cadastrados nos catálogos.
@@ -313,7 +367,7 @@ model Product {
   merchantId     String
   quantidade       Int
   catalogo         Catalogo?      @relation(fields: [catalogoId], references: [id])
-  merchant       Comerciante     @relation(fields: [merchantId], references: [id])
+  merchant       Merchant     @relation(fields: [merchantId], references: [id])
   Criador          Criador[]      // Relação com Criador, se o produto estiver associado a criadores
 
   Report Report[]
@@ -354,6 +408,8 @@ model Afiliacao {
   updateIn     DateTime          @updatedAt
   programa     ProgramaAfiliados @relation(fields: [programaId], references: [id])
   User         User              @relation(fields: [UserId], references: [id])
+
+  Merchant Merchant[]
 }
 
 // Modelo ProgramaAfiliados: representa campanhas de afiliados criadas pelos merchantes.
@@ -366,7 +422,7 @@ model ProgramaAfiliados {
   CreateIn     DateTime      @default(now())
   updateIn     DateTime      @updatedAt
   afiliacoes   Afiliacao[]
-  merchant   Comerciante    @relation(fields: [merchantId], references: [id])
+  merchant   Merchant    @relation(fields: [merchantId], references: [id])
   Criador      Criador[]     // Relação adicional se product também estiverem vinculados a criadores
 }
 
@@ -374,12 +430,12 @@ model ProgramaAfiliados {
 model Auditoria {
   id       String   @id @default(cuid())
   UserId   String
-  ComercianteId String
+  MerchantId String
   action     String
   details String
   CreateIn DateTime @default(now())
   User     User     @relation(fields: [UserId], references: [id])
-  Comerciante Comerciante @relation(fields: [ComercianteId], references: [id])
+  Merchant Merchant @relation(fields: [MerchantId], references: [id])
 }
 
 // Modelo Report: recebe as denuncias feitas pelos usuarios 
@@ -387,7 +443,7 @@ model Report {
   id             String       @id @default(uuid()) // ID único da denúncia
   reporter       User         @relation(name: "ReporterReports", fields: [reporterId], references: [id]) // Usuário que fez a denúncia
   reporterId     String       
-  reported       Comerciante?    @relation(name: "MerchantReports", fields: [reportedId], references: [id]) // Comerciante denunciado
+  reported       Merchant?    @relation(name: "MerchantReports", fields: [reportedId], references: [id]) // Merchant denunciado
   reportedId     String?      
   product        Product?     @relation(fields: [productId], references: [id]) // Produto denunciado (se aplicável)
   productId      String?      
@@ -398,7 +454,7 @@ model Report {
   guardianId     String?      
   createdAt      DateTime     @default(now()) // Data da denúncia
   resolvedAt     DateTime?    // Data de resolução
-
+  updatedAt      DateTime     @updatedAt // Data da última atualização
   User User[] @relation("user reporter")
 }
 
@@ -438,7 +494,7 @@ model Inscricao {
 model PaymentAudit {
   id            String        @id @default(uuid())
   user          User          @relation(fields: [userId], references: [id])
-  merchant      Comerciante   @relation(fields: [merchantId], references: [id])
+  merchant      Merchant   @relation(fields: [merchantId], references: [id])
   creator       Criador       @relation(fields:[creatorId], references: [id])
   creatorId     String
   merchantId    String
@@ -448,5 +504,9 @@ model PaymentAudit {
   paymentMethod paymentMethod
   status        PaymentStatus @default(PENDING)
   createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  description   String?
+  transactionId String? // ID da transação no sistema de pagamento
+  paymentDate   DateTime? // Data do pagamento, se aplicável
+  refundDate    DateTime? // Data do reembolso, se aplicável
 }
-

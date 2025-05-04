@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/connect-prisma'
-import type { makeeCatalog } from '@/use-case/make/make-catalogo'
+import type { makeeCatalog } from '@/use-case/utils/regulations/make/make-catalogo'
 import { exibir } from '@/use-case/utils/exibir'
 import type { Catalogo } from '@prisma/client'
 

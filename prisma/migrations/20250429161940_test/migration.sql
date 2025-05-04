@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "roleEnum" ADD VALUE 'FORNECEDOR_DE_SERVICOS';

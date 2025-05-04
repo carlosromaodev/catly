@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { DatabaseInMemoryUsuario } from '../repository/in-Memory/inMemory-Usuario'
+import { DatabaseInMemoryUsuario } from '@/repository/in-Memory/inMemory-Usuario'
 import { userController } from '../use-case/controller-user'
 import { hash } from 'bcryptjs'
 import { exibir } from './utils/exibir'
@@ -19,31 +19,32 @@ describe('TESTES CONTROLLER USER', () => {
 
   it('TESTANDO A CRIAÇÃO DO USUARIO', async () => {
     const user = await sub.createUser({
-      name: 'Carlos Romão',
-      email: 'romaoa59@gmail.com',
+      name: 'Harry Lane',
+      email: 'wuhop@vaw.nz',
       password: '123456',
-      phone: '940999843',
+      phone: '(767) 588-2979',
     })
 
     expect(user).toHaveProperty('user') // Verifica se há um objeto `user`
-    expect(user.user).toHaveProperty('email', 'romaoa59@gmail.com') // Verifica o email do usuário
-    expect(user.user).toHaveProperty('name', 'Carlos Romão') // Verifica o nome
+    expect(user.user).toHaveProperty('email', 'wuhop@vaw.nz') // Verifica o email do usuário
+    expect(user.user).toHaveProperty('name', 'Harry Lane') // Verifica o nome
   })
 
-  //====================================================//* BUSCAR USUARIO PELO ID
+  //====================================================//* TESTANDO A BUSCAR USUARIO PELO ID
 
-  it('TESTANTOBUSCA DO USUARIO PELO ID', async () => {
+  it('TESTANTO BUSCA DO USUARIO PELO ID', async () => {
     const user = await sub.createUser({
-      name: 'Carlos Romão',
-      email: 'romaoa59@gmail.com',
+      name: 'Adelaide Salazar',
+      email: 'pedisu@citranpiz.ee',
       password: '123456',
-      phone: '940999843',
+      phone: '(853) 691-4148',
     })
 
     const findUser = await sub.findUser(user.user.email)
 
     expect(findUser).toHaveProperty('user')
-    expect(findUser.user).toHaveProperty('email', 'romaoa59@gmail.com')
+    expect(findUser).not.toBeNull() // Verifica se findUser não é nulo
+    expect(findUser!.user).toHaveProperty('email', 'pedisu@citranpiz.ee') // Usa o operador de não-nulo
   })
 
   //============================================//* TESTANDO A ALTERACÃO DA SENHA

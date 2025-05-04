@@ -1,4 +1,4 @@
-import type { makeeCatalog } from '@/use-case/make/make-catalogo'
+import type { makeeCatalog } from '@/use-case/utils/regulations/make/make-catalogo'
 import type { Catalogo } from '@prisma/client';
 import {DatabaseInMemoryUsuario} from '@/repository/in-Memory/inMemory-Usuario'
 export class InMemoryCaralogo implements m     vbakeeCatalog {

@@ -1,6 +1,6 @@
 import type { Produto } from '@prisma/client'
 import { prisma } from '../../lib/connect-prisma'
-import type { makeeProduct } from '../../use-case/make/make-produtos'
+import type { makeeProduct } from '../../use-case/utils/regulations/make/make-produtos'
 
 export class DatabasePrismaFornecedor implements makeeProduct {
   async criarProduto(data: Produto): Promise<Produto> {

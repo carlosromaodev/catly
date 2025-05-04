@@ -1,10 +1,11 @@
-import { DatabasePrismaUsuario } from '../../repository/in-Prisma/Bd-Prisma-Usuario'
-import { DatabasePrismaFornecedor } from '../../repository/in-Prisma/Bd-Prismo-Fornecedor'
-import { ForneceedorCreate } from '../controller-merchant'
+import { DatabaseInMemoryMerchant } from '@/repository/in-Memory/inMemory-Merchant'
+import {DatabaseInMemoryUsuario} from '@/repository/in-Memory/inMemory-Usuario'
+import { MerchantController } from '@/use-case/controller-merchant'
 
 export function FactoriesFornecedor() {
-  const DATABASEUSUARIO = new DatabasePrismaUsuario()
-  const DATABASEFORNECEDOR = new DatabasePrismaFornecedor()
-  const SUT = new ForneceedorCreate(DATABASEUSUARIO, DATABASEFORNECEDOR)
+  const DATABASEFORNECEDOR = new DatabaseInMemoryMerchant()
+  const DATABASEUSER = new DatabaseInMemoryUsuario()
+
+  const SUT = new MerchantController( DATABASEUSER, DATABASEFORNECEDOR) 
   return SUT
 }

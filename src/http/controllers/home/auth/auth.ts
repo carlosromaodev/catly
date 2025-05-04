@@ -1,26 +1,28 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
-import { FactoriesAuth } from '../../../../use-case/factories/factories-auth'
-import { exibir } from '../../../../use-case/utils/exibir'
+import { FactoriesAuth } from '@/use-case/factories/factories-auth'
+import { exibir } from '@/use-case/utils/exibir'
 
 export async function Auth(request: FastifyRequest, reply: FastifyReply) {
+
   const schemaDados = z.object({
     email: z.string().email(),
-    senha: z.string().min(6),
+    password: z.string().min(6),
   })
 
   try {
-    const { email, senha } = schemaDados.parse(request.body)
+    const { email, password } = schemaDados.parse(request.body)
     const dados = FactoriesAuth()
-    const { usuario } = await dados.login({ email, senha })
+    const { usuario } = await dados.login({ email, password })
 
-    if (!usuario?.email || !usuario?.role || !usuario?.id) {
+    if (!usuario?.email || !usuario?.status || !usuario?.id) {
       throw new Error('Dados do usuário incompletos')
     }
+
     const token = await reply.jwtSign(
       {
         email: usuario.email,
-        role: usuario.role,
+        role: usuario.status,
       },
       {
         sub: usuario.id,
@@ -30,15 +32,15 @@ export async function Auth(request: FastifyRequest, reply: FastifyReply) {
     const refreshToken = await reply.jwtSign(
       {
         email: usuario.email,
-        role: usuario.role,
+        role: usuario.status,
       },
       {
         sub: usuario.id,
       }
     )
-
     exibir.info('LOGADO COM SUCESSO')
     reply.status(201).send({ token })
+
   } catch (err) {
     if (err instanceof z.ZodError) {
       reply.status(400).send({ message: 'Dados inválidos', issues: err.errors })

@@ -1,29 +1,20 @@
-import type { Prisma, Usuario } from '@prisma/client'
+import type { Prisma, User } from '@prisma/client'
 import { prisma } from '../../lib/connect-prisma'
 import { FactoriesFornecedor } from '../../use-case/factories/factories-fornecedor'
-import type { makeUsuario } from '../../use-case/make/make-User'
+import type { makeUser } from '../../use-case/utils/regulations/make/make-User'
 
-export class DatabasePrismaUsuario implements makeUsuario {
-
-  async actualizarUsuario(email: string): Promise<Usuario> {
-    const fornecedor = FactoriesFornecedor().findFornecedorEmail(email)
-    const usuarioAtualizado = await prisma.usuario.update({
-      where: { email },
-      data: { fornecedorId: (await fornecedor).fornecedor.id },
-    })
-    return usuarioAtualizado
-  }
-
-  async findId(id: string): Promise<Usuario | null> {
-    const usuario = await prisma.usuario.findUnique({
+export class DatabasePrismaUsuario implements makeUser {
+  async findUserId(id: string): Promise<User | null> {
+    const user = await prisma.user.findUnique({
       where: { id },
     })
-    return usuario
+    return user
   }
-  async Criar(data: Prisma.UsuarioCreateInput): Promise<Usuario> {
+
+  async Create(data: User): Promise<User> {
     try {
-      const usuario = await prisma.usuario.create({ data })
-      return usuario
+      const user = await prisma.user.create({ data })
+      return user
     } catch (error) {
       throw new Error(
         `Erro ao criar usuário no banco: ${(error as Error).message}`
@@ -31,26 +22,38 @@ export class DatabasePrismaUsuario implements makeUsuario {
     }
   }
 
-  async ProcurarGmail(email: string): Promise<Usuario | null> {
+  async FindUserEmail(email: string): Promise<User | null> {
     try {
-      const usuario = await prisma.usuario.findUnique({
+      const user = await prisma.user.findUnique({
         where: { email },
       })
-      return usuario
+      return user
     } catch (error) {
       throw new Error(`Erro ao procurar e-mail: ${(error as Error).message}`)
     }
   }
 
-  async alterarSenha(email: string, novaSenha: string): Promise<Usuario> {
+  async ChangeUserPassword(email: string, newPassword: string): Promise<User> {
     try {
-      const usuario = await prisma.usuario.update({
+      const user = await prisma.user.update({
         where: { email },
-        data: { senha: novaSenha },
+        data: { password: newPassword },
       })
-      return usuario
+      return user
     } catch (error) {
       throw new Error(`Erro ao alterar senha: ${(error as Error).message}`)
+    }
+  }
+
+  async ChangeName(email: string, newName: string): Promise<User> {
+    try {
+      const user = await prisma.user.update({
+        where: { email },
+        data: { name: newName },
+      })
+      return user
+    } catch (error) {
+      throw new Error(`Erro ao alterar nome: ${(error as Error).message}`)
     }
   }
 }

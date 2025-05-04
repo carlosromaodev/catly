@@ -1,5 +1,5 @@
 import type { Catalogo } from '@prisma/client'
-import type { makeeCatalog } from './make/make-catalogo'
+import type { makeeCatalog } from './utils/regulations/make/make-catalogo'
 import { exibir } from './utils/exibir'
 
 interface requestCatalogo {

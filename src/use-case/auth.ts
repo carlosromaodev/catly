@@ -1,37 +1,37 @@
-import type { Usuario } from '@prisma/client'
+import type { User } from '@prisma/client'
 import { compare, hash } from 'bcryptjs'
 import bcrypt from 'bcryptjs'
 import { ErrorAuth } from './error/erro-auth'
-import type { makeUsuario } from './make/make-User'
+import type { makeUser } from './utils/regulations/make/make-User'
 import { exibir } from './utils/exibir'
 
 interface RequestAuth {
   email: string
-  senha: string
+  password: string
 }
 
 interface ResponseAuth {
-  usuario: Usuario
+  usuario: User
 }
 
 export class useCaseAuth {
-  constructor(private funcoes: makeUsuario) {}
+  constructor(private funcoes: makeUser) {}
 
-  async login({ email, senha }: RequestAuth): Promise<ResponseAuth> {
-    const usuario = await this.funcoes.ProcurarGmail(email)
+  async login({ email, password }: RequestAuth): Promise<ResponseAuth> {
+    const usuario = await this.funcoes.FindUserEmail(email)
     if (!usuario) {
       exibir.fatal(`USUARIO NAO ENCONTRADO: ${email}`)
       throw new Error('Usuário não encontrado')
     }
-    const verif = await bcrypt.compare(senha, usuario.senha)
+    const verif = await bcrypt.compare(password, usuario.password)
 
     if (!verif) {
-      exibir.fatal(`SENHA INCORRETA PARA USUARIO: ${email}`)
-      throw new Error('Senha incorreta')
+      exibir.fatal(`password INCORRETA PARA USUARIO: ${email}`)
+      throw new Error('password incorreta')
     }
 
     exibir.info(
-      `USUARIO LOGADO COM SUCESSO: ${usuario.nome} (${usuario.email})`
+      `USUARIO LOGADO COM SUCESSO: ${usuario.name} (${usuario.email})`
     )
     return { usuario }
   }

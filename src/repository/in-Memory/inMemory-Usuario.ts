@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import type { makeUser } from '../../use-case/make/make-User'
+import type { makeUser } from '../../use-case/utils/regulations/make/make-User'
 import { exibir } from '../../use-case/utils/exibir'
 import type { User } from '.prisma/client'
 import { UserError } from '../../use-case/error/error-user'
@@ -19,9 +19,8 @@ export class DatabaseInMemoryUsuario implements makeUser {
       phone: date.phone,
       updateIn: new Date(),
       CreateIn: new Date(),
-      status: 'EXPLORADOR',
+      status: 'Explorador',
       adderessid: null,
-      merchantId: null,
     }
 
     if (!newUser) {
@@ -36,7 +35,7 @@ export class DatabaseInMemoryUsuario implements makeUser {
 
   //================ //* METODO USADO PARA BUSCAR USUARIO PELO EMAIL
 
-  async FindEmail(email: string): Promise<User | null> {
+  async FindUserEmail(email: string): Promise<User | null> {
     const User = this.DATABASE.find(item => item.email === email)
 
     if (!User) {
@@ -49,7 +48,7 @@ export class DatabaseInMemoryUsuario implements makeUser {
 
   //================ //* METODO USADO PARA BUSCAR USUARIO PELO ID
 
-  async findId(id: string): Promise<User | null> {
+  async findUserId(id: string): Promise<User | null> {
     const User = this.DATABASE.find(item => item.id === id)
 
     if (!User) {
@@ -62,7 +61,7 @@ export class DatabaseInMemoryUsuario implements makeUser {
 
   //================ //* METODO USADO PARA ALTERAR A SENHA DO USUARIO
 
-  async ChangePassword(email: string, newPassword: string): Promise<User> {
+  async ChangeUserPassword(email: string, newPassword: string): Promise<User> {
     const User = this.DATABASE.find(item => item.email === email)
 
     if (!User) {
